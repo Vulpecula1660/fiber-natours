@@ -1,13 +1,36 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+
+	"github.com/Vulpecula1660/fiber-natours/api"
+	"github.com/Vulpecula1660/fiber-natours/api/protocol"
+)
 
 func main() {
-	app := fiber.New()
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
+	app := fiber.New(fiber.Config{
+		// Override default error handler
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			// Return from handler
+			return ctx.Status(fiber.StatusInternalServerError).JSON(protocol.Response{
+				Code:    strconv.Itoa(err.(*fiber.Error).Code),
+				Message: err.(*fiber.Error).Message,
+				Result:  struct{}{},
+			})
+		},
 	})
+
+	app.Use(logger.New())
+
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+	}))
+
+	api.SetupRoutes(app)
 
 	app.Listen("127.0.0.1:3000")
 }
