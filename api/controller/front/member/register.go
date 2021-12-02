@@ -9,6 +9,7 @@ import (
 
 	"github.com/Vulpecula1660/fiber-natours/api/middleware"
 	"github.com/Vulpecula1660/fiber-natours/api/protocol"
+	"github.com/Vulpecula1660/fiber-natours/service/member"
 )
 
 type (
@@ -26,7 +27,7 @@ type (
 
 	// RegisterStorage : 暫存
 	RegisterStorage struct {
-		Err error
+		Err *fiber.Error
 	}
 )
 
@@ -67,13 +68,19 @@ func Register(c *fiber.Ctx) error {
 // BindRequest : 解析參數
 func (task *registerTask) BindRequest(c *fiber.Ctx) bool {
 	if err := c.BodyParser(task.Req); err != nil {
-		task.Storage.Err = err
+		task.Storage.Err = &fiber.Error{
+			Code:    50000,
+			Message: err.Error(),
+		}
 		return true
 	}
 
 	err := validator.New().Struct(task.Req)
 	if err != nil {
-		task.Storage.Err = err
+		task.Storage.Err = &fiber.Error{
+			Code:    50000,
+			Message: err.Error(),
+		}
 		return true
 	}
 
@@ -82,6 +89,25 @@ func (task *registerTask) BindRequest(c *fiber.Ctx) bool {
 
 // DoRegister : 註冊會員
 func (task *registerTask) DoRegister(ctx context.Context) bool {
+	err := member.Register(
+		ctx,
+		&member.RegisterInput{
+			Account:  task.Req.Account,
+			Password: task.Req.Password,
+		},
+	)
+	if err != nil {
+		if e, ok := err.(*fiber.Error); ok {
+			task.Storage.Err = e
+			return true
+		}
+
+		task.Storage.Err = &fiber.Error{
+			Code:    50000,
+			Message: err.Error(),
+		}
+		return true
+	}
 
 	return false
 }
