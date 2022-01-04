@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Vulpecula1660/fiber-natours/enum"
-	"github.com/Vulpecula1660/fiber-natours/model/dao/user"
-	"github.com/Vulpecula1660/fiber-natours/model/dto"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/Vulpecula1660/fiber-natours/enum"
+	"github.com/Vulpecula1660/fiber-natours/model/dao/user"
+	"github.com/Vulpecula1660/fiber-natours/model/dto"
 )
 
 type RegisterInput struct {

@@ -18,9 +18,9 @@ type LoginInput struct {
 }
 
 // Login : 會員登入
-func Login(ctx context.Context, input *LoginInput) error {
+func Login(ctx context.Context, input *LoginInput) (apiToken string, err error) {
 	if input == nil {
-		return fmt.Errorf("參數錯誤")
+		return "", fmt.Errorf("參數錯誤")
 	}
 
 	// 用帳號搜尋
@@ -31,11 +31,11 @@ func Login(ctx context.Context, input *LoginInput) error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if len(res) == 0 {
-		return &fiber.Error{
+		return "", &fiber.Error{
 			Code:    enum.UserNotFound,
 			Message: "找不到使用者",
 		}
@@ -43,24 +43,24 @@ func Login(ctx context.Context, input *LoginInput) error {
 
 	// 比對密碼
 	if !comparePasswords(res[0].Password, []byte(input.Password)) {
-		return &fiber.Error{
+		return "", &fiber.Error{
 			Code:    enum.WrongPassword,
 			Message: "密碼錯誤",
 		}
 	}
 
 	// token create
-	err = token.Create(
+	apiToken, err = token.Create(
 		ctx,
 		&token.CreateInput{
 			UserID: res[0].ID,
 		},
 	)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return apiToken, nil
 }
 
 func comparePasswords(hashedPwd string, plainPwd []byte) bool {

@@ -19,6 +19,10 @@ type (
 		Password string `json:"password" validate:"required,min=6,max=30"` // 密碼（長度： 6~30）
 	}
 
+	LoginIOutput struct {
+		Token string `json:"token"`
+	}
+
 	loginTask struct {
 		APIName string
 		Req     *LoginInput
@@ -28,7 +32,8 @@ type (
 
 	// LoginStorage : 暫存
 	LoginStorage struct {
-		Err error
+		Err    error
+		Output *LoginIOutput
 	}
 )
 
@@ -42,7 +47,9 @@ func newLoginTask() *loginTask {
 			Message: "",
 			Result:  struct{}{},
 		},
-		Storage: &LoginStorage{},
+		Storage: &LoginStorage{
+			Output: &LoginIOutput{},
+		},
 	}
 }
 
@@ -62,6 +69,8 @@ func Login(c *fiber.Ctx) error {
 	if shouldBreak := task.DoLogin(ctx); shouldBreak {
 		return middleware.ErrorHandler(task.Storage.Err)
 	}
+
+	task.Res.Result = task.Storage.Output
 
 	return c.JSON(task.Res)
 }
@@ -90,7 +99,7 @@ func (task *loginTask) BindRequest(c *fiber.Ctx) bool {
 
 // DoLogin : 會員登入
 func (task *loginTask) DoLogin(ctx context.Context) bool {
-	err := member.Login(
+	token, err := member.Login(
 		ctx,
 		&member.LoginInput{
 			Account:  task.Req.Account,
@@ -101,6 +110,8 @@ func (task *loginTask) DoLogin(ctx context.Context) bool {
 		task.Storage.Err = err
 		return true
 	}
+
+	task.Storage.Output.Token = token
 
 	return false
 }
