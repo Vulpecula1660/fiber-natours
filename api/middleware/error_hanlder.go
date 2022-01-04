@@ -4,13 +4,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func ErrorHandler(err *fiber.Error) *fiber.Error {
+func ErrorHandler(err error) *fiber.Error {
 	// default error code
-	var errCode = 99999
+	errCode := 99999
 
-	if err.Code != 0 {
-		errCode = err.Code
+	if e, ok := err.(*fiber.Error); ok {
+		if e.Code != 0 {
+			errCode = e.Code
+		}
+
+		return fiber.NewError(errCode, e.Message)
 	}
 
-	return fiber.NewError(errCode, err.Message)
+	return fiber.NewError(errCode, err.Error())
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Vulpecula1660/fiber-natours/enum"
 	"github.com/Vulpecula1660/fiber-natours/model/dao/user"
 	"github.com/Vulpecula1660/fiber-natours/model/dto"
 	"github.com/gofiber/fiber/v2"
@@ -35,7 +36,7 @@ func Register(ctx context.Context, input *RegisterInput) error {
 
 	if total > 0 {
 		return &fiber.Error{
-			Code:    10001,
+			Code:    enum.AccountUsed,
 			Message: "帳號已被使用",
 		}
 	}

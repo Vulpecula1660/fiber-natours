@@ -12,7 +12,7 @@ func SetupRoutes(app *fiber.App) {
 	v1FrontNonToken := app.Group("/v1/front")
 	{
 		v1FrontNonToken.Post("/member/register", member.Register) // 註冊
-		// v1FrontNonToken.Post("/member/login")                     // 登入
+		v1FrontNonToken.Post("/member/login", member.Login)       // 登入
 	}
 
 	// routes

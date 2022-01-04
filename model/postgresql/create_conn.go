@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	//資料庫連線物件
+	// 資料庫連線物件
 	pool map[string]*sql.DB
 
-	//同步鎖
+	// 同步鎖
 	mu *sync.Mutex
 )
 

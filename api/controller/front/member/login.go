@@ -14,41 +14,41 @@ import (
 )
 
 type (
-	RegisterInput struct {
+	LoginInput struct {
 		Account  string `json:"account" validate:"required,min=4,max=18"`  // 帳號（長度： 4~18）
 		Password string `json:"password" validate:"required,min=6,max=30"` // 密碼（長度： 6~30）
 	}
 
-	registerTask struct {
+	loginTask struct {
 		APIName string
-		Req     *RegisterInput
+		Req     *LoginInput
 		Res     *protocol.Response
-		Storage *RegisterStorage
+		Storage *LoginStorage
 	}
 
-	// RegisterStorage : 暫存
-	RegisterStorage struct {
+	// LoginStorage : 暫存
+	LoginStorage struct {
 		Err error
 	}
 )
 
-// newRegisterTask : 實例化Task
-func newRegisterTask() *registerTask {
-	return &registerTask{
-		APIName: "Register",
-		Req:     &RegisterInput{},
+// newLoginTask : 實例化Task
+func newLoginTask() *loginTask {
+	return &loginTask{
+		APIName: "Login",
+		Req:     &LoginInput{},
 		Res: &protocol.Response{
 			Code:    "1",
 			Message: "",
 			Result:  struct{}{},
 		},
-		Storage: &RegisterStorage{},
+		Storage: &LoginStorage{},
 	}
 }
 
-// Register : 註冊
-func Register(c *fiber.Ctx) error {
-	task := newRegisterTask()
+// Login : 登入
+func Login(c *fiber.Ctx) error {
+	task := newLoginTask()
 
 	// 解析參數
 	if shouldBreak := task.BindRequest(c); shouldBreak {
@@ -58,8 +58,8 @@ func Register(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), time.Minute*15)
 	defer cancel()
 
-	// 註冊會員
-	if shouldBreak := task.DoRegister(ctx); shouldBreak {
+	// 會員登入
+	if shouldBreak := task.DoLogin(ctx); shouldBreak {
 		return middleware.ErrorHandler(task.Storage.Err)
 	}
 
@@ -67,7 +67,7 @@ func Register(c *fiber.Ctx) error {
 }
 
 // BindRequest : 解析參數
-func (task *registerTask) BindRequest(c *fiber.Ctx) bool {
+func (task *loginTask) BindRequest(c *fiber.Ctx) bool {
 	if err := c.BodyParser(task.Req); err != nil {
 		task.Storage.Err = &fiber.Error{
 			Code:    enum.ParameterError,
@@ -88,11 +88,11 @@ func (task *registerTask) BindRequest(c *fiber.Ctx) bool {
 	return false
 }
 
-// DoRegister : 註冊會員
-func (task *registerTask) DoRegister(ctx context.Context) bool {
-	err := member.Register(
+// DoLogin : 會員登入
+func (task *loginTask) DoLogin(ctx context.Context) bool {
+	err := member.Login(
 		ctx,
-		&member.RegisterInput{
+		&member.LoginInput{
 			Account:  task.Req.Account,
 			Password: task.Req.Password,
 		},

@@ -7,17 +7,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Vulpecula1660/fiber-natours/model/dto"
 	"github.com/Vulpecula1660/fiber-natours/model/postgresql"
 )
 
-// GetInput :
-type GetInput struct {
-	Account string
-}
-
-// GetCount : 取得 user
-// Transaction 為選填
-func GetCount(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret int64, err error) {
+// Get : 取得 user
+func Get(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret []*dto.User, err error) {
 	var dbS *dbSQL.DB
 
 	if tx == nil {
@@ -25,8 +20,11 @@ func GetCount(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret int64, er
 	}
 
 	sql := " SELECT "
-	sql += "    COUNT(*) "
-	sql += " FROM `user` "
+	sql += "    id,"
+	sql += "    account,"
+	sql += "    password"
+
+	sql += " FROM user "
 	sql += " WHERE "
 
 	var params []interface{}
@@ -40,7 +38,7 @@ func GetCount(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret int64, er
 
 	// 沒有條件時回傳錯誤
 	if len(wheres) == 0 {
-		return 0, fmt.Errorf("sql 語法錯誤")
+		return nil, fmt.Errorf("sql 語法錯誤")
 	}
 
 	sql += strings.Join(wheres, " AND ")
@@ -52,19 +50,24 @@ func GetCount(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret int64, er
 	} else {
 		rows, err = tx.QueryContext(ctx, sql, params...)
 	}
+
 	if err != nil {
-		return 0, fmt.Errorf("count 錯誤: %v", err)
+		return nil, fmt.Errorf("select 錯誤: %v", err)
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
+		data := &dto.User{}
 		if err := rows.Scan(
-			&ret,
+			&data.ID,
+			&data.Account,
+			&data.Password,
 		); err != nil {
-			return 0, fmt.Errorf("scan 錯誤: %v", err)
+			return nil, fmt.Errorf("scan 錯誤: %v", err)
 		}
+		ret = append(ret, data)
 	}
 
-	return ret, nil
+	return ret, err
 }
