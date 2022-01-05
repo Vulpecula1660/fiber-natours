@@ -9,6 +9,7 @@ import (
 
 	"github.com/Vulpecula1660/fiber-natours/api"
 	"github.com/Vulpecula1660/fiber-natours/api/protocol"
+	"github.com/Vulpecula1660/fiber-natours/enum"
 )
 
 func main() {
@@ -16,9 +17,10 @@ func main() {
 		// Override default error handler
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			// Return from handler
-			return ctx.Status(fiber.StatusInternalServerError).JSON(protocol.Response{
-				Code:    strconv.Itoa(err.(*fiber.Error).Code),
-				Message: err.(*fiber.Error).Message,
+			customError := err.(*enum.CustomError)
+			return ctx.Status(customError.HTTPStatus).JSON(protocol.Response{
+				Code:    strconv.Itoa(customError.Code),
+				Message: customError.Message,
 				Result:  struct{}{},
 			})
 		},

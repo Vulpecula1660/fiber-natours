@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
@@ -36,10 +35,7 @@ func Register(ctx context.Context, input *RegisterInput) error {
 	}
 
 	if total > 0 {
-		return &fiber.Error{
-			Code:    enum.AccountUsed,
-			Message: "帳號已被使用",
-		}
+		return enum.AccountUsed
 	}
 
 	// 密碼加密

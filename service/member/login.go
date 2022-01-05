@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Vulpecula1660/fiber-natours/enum"
@@ -35,18 +34,12 @@ func Login(ctx context.Context, input *LoginInput) (apiToken string, err error) 
 	}
 
 	if len(res) == 0 {
-		return "", &fiber.Error{
-			Code:    enum.UserNotFound,
-			Message: "找不到使用者",
-		}
+		return "", enum.UserNotFound
 	}
 
 	// 比對密碼
 	if !comparePasswords(res[0].Password, []byte(input.Password)) {
-		return "", &fiber.Error{
-			Code:    enum.WrongPassword,
-			Message: "密碼錯誤",
-		}
+		return "", enum.WrongPassword
 	}
 
 	// token create

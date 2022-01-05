@@ -78,19 +78,13 @@ func Login(c *fiber.Ctx) error {
 // BindRequest : 解析參數
 func (task *loginTask) BindRequest(c *fiber.Ctx) bool {
 	if err := c.BodyParser(task.Req); err != nil {
-		task.Storage.Err = &fiber.Error{
-			Code:    enum.ParameterError,
-			Message: err.Error(),
-		}
+		task.Storage.Err = enum.ParameterError(err)
 		return true
 	}
 
 	err := validator.New().Struct(task.Req)
 	if err != nil {
-		task.Storage.Err = &fiber.Error{
-			Code:    enum.ParameterError,
-			Message: err.Error(),
-		}
+		task.Storage.Err = enum.ParameterError(err)
 		return true
 	}
 

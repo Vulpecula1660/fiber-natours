@@ -1,20 +1,22 @@
 package middleware
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"net/http"
+
+	"github.com/Vulpecula1660/fiber-natours/enum"
 )
 
-func ErrorHandler(err error) *fiber.Error {
+func ErrorHandler(err error) *enum.CustomError {
 	// default error code
 	errCode := 99999
 
-	if e, ok := err.(*fiber.Error); ok {
-		if e.Code != 0 {
-			errCode = e.Code
-		}
-
-		return fiber.NewError(errCode, e.Message)
+	if e, ok := err.(*enum.CustomError); ok {
+		return e
 	}
 
-	return fiber.NewError(errCode, err.Error())
+	return &enum.CustomError{
+		HTTPStatus: http.StatusInternalServerError,
+		Code:       errCode,
+		Message:    err.Error(),
+	}
 }
