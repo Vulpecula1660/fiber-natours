@@ -36,6 +36,12 @@ func Get(ctx context.Context, input *GetInput, tx *dbSQL.Tx) (ret []*dto.User, e
 		params = append(params, input.Account)
 	}
 
+	// 會員ID
+	if input.UserID != "" {
+		wheres = append(wheres, " `id` = ? ")
+		params = append(params, input.UserID)
+	}
+
 	// 沒有條件時回傳錯誤
 	if len(wheres) == 0 {
 		return nil, fmt.Errorf("sql 語法錯誤")

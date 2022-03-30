@@ -13,6 +13,7 @@ import (
 // GetInput :
 type GetInput struct {
 	Account string
+	UserID  string
 }
 
 // GetCount : 取得 user
