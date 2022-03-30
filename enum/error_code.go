@@ -31,4 +31,8 @@ var (
 	UserNotFound = REST(http.StatusBadRequest, 10002, "找不到會員")
 
 	WrongPassword = REST(http.StatusBadRequest, 10003, "密碼錯誤")
+
+	NonLogin = REST(http.StatusUnauthorized, 10004, "未登入")
+
+	DataNotFound = REST(http.StatusNotFound, 10005, "找不到資料")
 )
